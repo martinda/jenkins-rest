@@ -1,5 +1,5 @@
 
-[![Build Status](https://travis-ci.org/cdancy/jenkins-rest.svg?branch=master)](https://travis-ci.org/cdancy/jenkins-rest)
+[![Build](https://github.com/jrestclients/jenkins-rest/actions/workflows/gradle/badge.svg?branch=main)](https://github.com/jrestclients/jenkins-rest/actions/workflows/gradle.yml?query=branch%3Amain)
 [![codecov](https://codecov.io/gh/cdancy/jenkins-rest/branch/master/graph/badge.svg)](https://codecov.io/gh/cdancy/jenkins-rest)
 [![Download](https://api.bintray.com/packages/cdancy/java-libraries/jenkins-rest/images/download.svg) ](https://bintray.com/cdancy/java-libraries/jenkins-rest/_latestVersion)
 [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-jenkins&#8211;rest-4183C4.svg)](https://stackoverflow.com/questions/tagged/jenkins+rest)

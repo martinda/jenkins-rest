@@ -35,7 +35,7 @@ Can be found in jcenter like so:
 
 ## Documentation
 
-* javadocs can be found via [github pages here](http://cdancy.github.io/jenkins-rest/docs/javadoc/)
+* javadocs can be found via [javadoc.io](https://javadoc.io/doc/com.cdancy/jenkins-rest)
 * the [jenkins-rest wiki](https://github.com/cdancy/jenkins-rest/wiki)
 
 ## Property based setup
@@ -89,6 +89,7 @@ Running integration tests can be done like so (requires existing jenkins instanc
 #### Jenkins instance requirements
 
 - a running instance accessible on http://127.0.0.1:8080 (can be changed in the gradle.properties file)
+- no pre-existing jobs
 - Jenkins security
   - an `admin` user (credentials used by the tests can be changed in the gradle.properties file) with `ADMIN` role (required as the tests install plugins)
   - [CSRF protection enabled](https://wiki.jenkins.io/display/JENKINS/CSRF+Protection). Not mandatory but [recommended by the Jenkins documentation](https://jenkins.io/doc/book/system-administration/security/#protect-users-of-jenkins-from-other-threats). The lib supports Jenkins instances with our without this protection (see #14)
@@ -97,6 +98,7 @@ Running integration tests can be done like so (requires existing jenkins instanc
 to http://127.0.0.1:8080/job/test-folder/job/test-folder-1/ `java.lang.NoClassDefFoundError: com/cloudbees/hudson/plugins/folder/properties/FolderCredentialsProvider`
   - [OWASP Markup Formatter](https://plugins.jenkins.io/antisamy-markup-formatter) configured to use `Safe HTML`
   - [Configuration As Code](https://plugins.jenkins.io/configuration-as-code) plugin installed
+  - [Cloudbees Folder](https://plugins.jenkins.io/cloudbees-folder) plugin installed
 
 This project provides instructions to setup a [pre-configured Docker container](src/main/docker/README.md)
 

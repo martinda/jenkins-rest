@@ -1,5 +1,15 @@
 ### Version 0.0.30 (TBA)
 
+### Version 0.0.30 (August 11, 2021)
+* ADDED: Configuration-as-code
+* ADDED: ChangeSets to BuildInfo
+* ADDED: allow access to QueueItem.timestamp for items waiting in queue scheduled for later execution
+* ADDED: Publishing to Maven Central
+* Bump: jenkins version 2.289.3
+* Bump: openjdk11
+* Bump: gradle 7.1.1
+* Bump: lots of dependencies
+
 ### Version 0.0.29 (February 2, 2021)
 * BUGFIX: Fix possible null `url` item int `Task`. - [Pull Request 144](https://github.com/cdancy/jenkins-rest/pull/144)
 

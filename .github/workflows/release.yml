@@ -1,17 +1,37 @@
 name: Release Manually
 
-on:
-    workflow_dispatch:
-        inputs:
-            version:
-                description: 'Version string'
-                required: true
-                default: '0.0.0'
+on: workflow_dispatch
 
 jobs:
-    say_hello:
+    allTests:
         runs-on: ubuntu-latest
-        steps:
-            - run: |
-                echo "Hello ${{github.event.inputs.name}}"
 
+        steps:
+            - name: Clone
+              uses: actions/checkout@v2
+
+            - name: Start Jenkins
+              run: |
+                  docker build -t jenkins-rest/jenkins src/main/docker
+                  docker run -d --rm -p 8080:8080 --name jenkins-rest jenkins-rest/jenkins
+
+            - uses: actions/setup-java@v2
+              with:
+                  distribution: 'adopt'
+                  java-version: 11
+
+            - name: Run all tests
+              uses: gradle/gradle-build-action@v1
+              with:
+                  arguments: -s -Dorg.gradle.daemon=false clean build mockTest publishToMavenLocal integTest
+
+            - name: Stop container
+              if: always()
+              run: docker stop jenkins-rest
+
+            - name: Archive Test Results
+              if: always()
+              uses: actions/upload-artifact@v2
+              with:
+                  name: test-artifacts
+                  path: build/reports/tests

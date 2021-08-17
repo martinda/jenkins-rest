@@ -5,6 +5,7 @@ on: workflow_dispatch
 jobs:
     allTests:
         runs-on: ubuntu-latest
+        timeout-minutes: 20
 
         steps:
             - name: Clone

@@ -2,7 +2,7 @@
 # If adding categories, please also update: https://github.com/jenkins-infra/jenkins-maven-cd-action/blob/master/action.yaml#L16
 categories:
   - title: 💥 Breaking changes
-    labels: 
+    labels:
       - breaking
   - title: 🚨 Removed
     label: removed
@@ -28,18 +28,18 @@ categories:
       - regression
   - title: 👷 Changes for developers
     labels:
-      - developer 
+      - developer
   # Default label used by Dependabot
   - title: 📦 Dependency updates
     label: dependencies
   - title: 📝 Documentation updates
     label: documentation
   - title: 👻 Maintenance
-    labels: 
+    labels:
       - chore
       - internal
   - title: 🚦 Tests
-    labels: 
+    labels:
       - test
       - tests
 exclude-labels:

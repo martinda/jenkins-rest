@@ -1,0 +1,17 @@
+name: Release
+
+on:
+    workflow_dispatch:
+        inputs:
+            version:
+                description: 'Version string'
+                required: 'true'
+                default: '0.0.0'
+
+jobs:
+    say_hello:
+        runs-on: ubuntu-latest
+        steps:
+            - run: |
+                echo "Hello ${{github.event.inputs.name}}"
+

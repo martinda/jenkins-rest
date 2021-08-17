@@ -1,11 +1,11 @@
-name: Release
+name: Release Manually
 
 on:
     workflow_dispatch:
         inputs:
             version:
                 description: 'Version string'
-                required: 'true'
+                required: true
                 default: '0.0.0'
 
 jobs:

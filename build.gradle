@@ -69,6 +69,8 @@ task mockTest(type: Test) {
 }
 
 task integTest(type: Test, dependsOn: mockTest) {
+    group = "Verification"
+    description =  "Runs the integration tests - Requires a live Jenkins server"
     doFirst {
         def integProjectDir = project.file("${buildDir}/integ-projects")
         if (!integProjectDir.exists()) {

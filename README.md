@@ -1,7 +1,5 @@
 
 [![Build](https://github.com/jrestclients/jenkins-rest/actions/workflows/gradle/badge.svg?branch=main)](https://github.com/jrestclients/jenkins-rest/actions/workflows/gradle.yml?query=branch%3Amain)
-[![codecov](https://codecov.io/gh/cdancy/jenkins-rest/branch/master/graph/badge.svg)](https://codecov.io/gh/cdancy/jenkins-rest)
-[![Download](https://api.bintray.com/packages/cdancy/java-libraries/jenkins-rest/images/download.svg) ](https://bintray.com/cdancy/java-libraries/jenkins-rest/_latestVersion)
 [![Stack Overflow](https://img.shields.io/badge/stack%20overflow-jenkins&#8211;rest-4183C4.svg)](https://stackoverflow.com/questions/tagged/jenkins+rest)
 
 # jenkins-rest
@@ -23,10 +21,10 @@ assertTrue(systemInfo.jenkinsVersion().equals("1.642.4"));
       
 ## Latest release
 
-Can be found in jcenter like so:
+Can be found in maven central like so:
 ```
 <dependency>
-  <groupId>com.cdancy</groupId>
+  <groupId>io.github.jrestlients</groupId>
   <artifactId>jenkins-rest</artifactId>
   <version>X.Y.Z</version>
   <classifier>sources|tests|javadoc|all</classifier> (Optional)
@@ -35,7 +33,7 @@ Can be found in jcenter like so:
 
 ## Documentation
 
-* javadocs can be found via [javadoc.io](https://javadoc.io/doc/com.cdancy/jenkins-rest)
+* javadocs can be found via [javadoc.io](https://javadoc.io/doc/io.github.jrestclients/jenkins-rest)
 * the [jenkins-rest wiki](https://github.com/cdancy/jenkins-rest/wiki)
 
 ## Property based setup
@@ -66,7 +64,7 @@ jenkins-rest credentials can take 1 of 2 forms:
 
 ## Examples
 
-The [mock](https://github.com/cdancy/jenkins-rest/tree/master/src/test/java/com/cdancy/jenkins/rest/features) and [live](https://github.com/cdancy/jenkins-rest/tree/master/src/test/java/com/cdancy/jenkins/rest/features) tests provide many examples
+The [mock](https://github.com/jrestclients/jenkins-rest/tree/master/src/test/java/com/cdancy/jenkins/rest/features) and [live](https://github.com/jrestclients/jenkins-rest/tree/master/src/test/java/com/cdancy/jenkins/rest/features) tests provide many examples
 that you can use in your own code.
 
 ## Components
@@ -117,6 +115,6 @@ This project provides instructions to setup a [pre-configured Docker container](
 
 # Additional Resources
 
-* [Jenkins REST API](http://wiki.jenkins-ci.org/display/JENKINS/Remote+access+API)
+* [Jenkins REST API](https://www.jenkins.io/doc/book/using/remote-access-api/#RemoteaccessAPI-JavaAPIwrappers)
 * [Apache jclouds](https://jclouds.apache.org/start/)
 

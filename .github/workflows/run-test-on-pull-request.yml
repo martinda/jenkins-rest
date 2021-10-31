@@ -90,7 +90,7 @@ jobs:
         # Examining the git log (for debug)
         - name: Git log
           run: |
-              git log --format=format:"%C(auto)%h %C(cyan)%ar%C(auto) %d %C(green)%aN%Creset %s" --graph --all -n 15
+              git log --format=format:"%C(auto)%h %C(cyan)%ad%C(auto) %d %C(green)%aN%Creset %s" --graph --all -n 15
 
         # Examine the merge commit (debug)
         - name: Show summary
@@ -119,7 +119,7 @@ jobs:
           with:
               arguments: |
                   --info
-                  --console-plain
+                  --console=plain
                   --no-daemon
                   build
                   mockTest
@@ -134,7 +134,7 @@ jobs:
           with:
               arguments: |
                   --info
-                  --console-plain
+                  --console=plain
                   --no-daemon
                   publishToMavenLocal
                   -Pversion=${{ github.event.release.tag_name }}
@@ -151,7 +151,7 @@ jobs:
           with:
               arguments: |
                   --info
-                  --console-plain
+                  --console=plain
                   --no-daemon
                   integTest
 

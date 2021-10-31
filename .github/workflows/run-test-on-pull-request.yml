@@ -137,7 +137,6 @@ jobs:
                   --console=plain
                   --no-daemon
                   publishToMavenLocal
-                  -Pversion=${{ github.event.release.tag_name }}
                   -PsignPublication=true
 
         - name: Display tree of mavenLocal

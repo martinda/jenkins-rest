@@ -106,12 +106,6 @@ jobs:
         - name: Validate gradle wrapper
           uses: gradle/wrapper-validation-action@v1
 
-        - name: Start Jenkins
-          if: ${{ startsWith(github.event.comment.body, '/testInteg') }}
-          run: |
-              docker build -t jenkins-rest/jenkins src/main/docker
-              docker run -d --rm -p 8080:8080 --name jenkins-rest jenkins-rest/jenkins
-
         - name: Run mock tests
           if: success()
           # Run the mock tests only
@@ -143,9 +137,14 @@ jobs:
           if: success()
           run: tree ~/.m2/repository/io/github/jrestclients
 
-        - name: Run integrtion tests
-          if: ${{ success() && startsWith(github.event.comment.body, 'testInteg') }}
-          # Run the mock tests only
+        - name: Start Jenkins container
+          if: success()
+          run: |
+              docker build -t jenkins-rest/jenkins src/main/docker
+              docker run -d --rm -p 8080:8080 --name jenkins-rest jenkins-rest/jenkins
+
+        - name: Run integration tests
+          if: success()
           uses: gradle/gradle-build-action@v2
           with:
               arguments: |
@@ -154,8 +153,8 @@ jobs:
                   --no-daemon
                   integTest
 
-        - name: Stop container
-          if: ${{ startsWith(github.event.comment.body, '/testInteg') }}
+        - name: Stop Jenkins container
+          if: always()
           run: docker stop jenkins-rest
 
         - name: Publish test reports

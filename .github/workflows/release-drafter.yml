@@ -6,9 +6,15 @@ on:
     branches:
       - main
   # pull_request event is required only for autolabeler
-  pull_request:
+  # Commented out because if https://github.com/release-drafter/release-drafter/issues/785#issuecomment-778700859
+  # "The auto labeler has yet to be released in v5."
+  #pull_request:
     # Only following types are handled by the action, but one can default to all as well
-    types: [opened, reopened, synchronize]
+    #  types: [opened, reopened, synchronize]
+
+permissions:
+    contents: write
+    pull-requests: read
 
 jobs:
   update_release_draft:

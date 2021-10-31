@@ -1,0 +1,195 @@
+# This workflow builds pull-requests but does not merge them
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+#
+
+name: Pull-Request Build
+
+on:
+    issue_comment:
+        types: [created]
+
+jobs:
+  build-pull-request:
+    name: Run pull-request testing
+    # The run is triggered by a user entering /test as a PR comment
+    if: ${{ github.event.issue.pull_request && startsWith(github.event.comment.body, '/test') }}
+    #if: ${{ github.event.issue.pull_request && github.event.comment.body == '/test' }}
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+        # Some steps for learning and for debug
+        #- name: github.event.issue.pull_request (debug)
+        #  env:
+        #      PR: ${{ toJSON(github.event.issue.pull_request) }}
+        #  run: echo "-- $PR --"
+        #- name: github.event.comment.body (debug)
+        #  env:
+        #      COMMENT: ${{ toJSON(github.event.comment.body) }}
+        #  run: echo "-- $COMMENT --"
+        #- name: GITHUB_EVENT_PATH (debug)
+        #  run: cat $GITHUB_EVENT_PATH
+        #- name: curl pull request url (debug)
+        #  run: curl -s -X GET ${{ github.event.issue.pull_request.url }}
+
+        # Get PR context
+        # This will give us the head SHA1 which is used when posting the status
+        - name: Get PR context
+          id: pr-context
+          uses: actions/github-script@v4.1.0
+          with:
+              # the return value is always a string, even when set to "json"
+              result-encoding: json
+              script: |
+                  const response = await github.pulls.get({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      pull_number: context.payload.issue.number
+                  });
+                  console.log(response)
+                  return response
+
+        # Update the PR status to pending
+        # Done by posting "pending" to the PR head sha
+        - name: Update status to pending
+          run: |
+              curl -X POST -v \
+              --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+              --header "Accept: application/vnd.github.v3+json" \
+              --data '{
+                  "context": "pull-request-test",
+                  "state": "pending",
+                  "description": "pull-request-test pending",
+                  "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              }' \
+              --url 'https://api.github.com/repos/${{ github.repository }}/statuses/${{ fromJSON(steps.pr-context.outputs.result).data.head.sha }}' \
+              --fail
+
+        # Examples of the different ways to use the pr-context json string
+        #- name: Examine pr-context
+        #  env:
+        #      PR1: ${{ toJSON(steps.pr-context.outputs) }}
+        #      PR2: ${{ toJSON(steps.pr-context.outputs.result) }}
+        #      PR3: ${{ fromJSON(steps.pr-context.outputs.result).status }}
+        #      PR4: ${{ fromJSON(steps.pr-context.outputs.result).data.base.ref }}
+        #      PR5: ${{ toJSON(fromJSON(steps.pr-context.outputs.result).data) }}
+        #  run: |
+        #      echo "PR3: $PR3"
+        #      echo "PR4: $PR4"
+
+        # Checkout the merge commit
+        # This is the commit we build
+        - name: Checkout the merge commit
+          uses: actions/checkout@v2
+          with:
+              # Use either fetch-depth: 0 and manually merge, or reference the merge_commit_sha
+              ref: ${{ fromJSON(steps.pr-context.outputs.result).data.merge_commit_sha }}
+
+
+        # Examining the git log (for debug)
+        - name: Git log
+          run: |
+              git log --format=format:"%C(auto)%h %C(cyan)%ar%C(auto) %d %C(green)%aN%Creset %s" --graph --all -n 15
+
+        # Examine the merge commit (debug)
+        - name: Show summary
+          run: git show --summary
+
+        # Setup Java
+        - name: Set up JDK 11
+          uses: actions/setup-java@v2
+          with:
+            java-version: '11'
+            distribution: 'adopt'
+
+        - name: Validate gradle wrapper
+          uses: gradle/wrapper-validation-action@v1
+
+        - name: Start Jenkins
+          if: ${{ startsWith(github.event.comment.body, '/testInteg') }}
+          run: |
+              docker build -t jenkins-rest/jenkins src/main/docker
+              docker run -d --rm -p 8080:8080 --name jenkins-rest jenkins-rest/jenkins
+
+        - name: Run mock tests
+          if: success()
+          # Run the mock tests only
+          uses: gradle/gradle-build-action@v2
+          with:
+              arguments: |
+                  --info
+                  --console-plain
+                  --no-daemon
+                  build
+                  mockTest
+
+        - name: Publish to MavenLocal
+          if: success()
+          uses: gradle/gradle-build-action@v2
+          env:
+              ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+              ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.SIGNING_KEY_ID }}
+              ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+          with:
+              arguments: |
+                  --info
+                  --console-plain
+                  --no-daemon
+                  publishToMavenLocal
+                  -Pversion=${{ github.event.release.tag_name }}
+                  -PsignPublication=true
+
+        - name: Display tree of mavenLocal
+          if: success()
+          run: tree ~/.m2/repository/io/github/jrestclients
+
+        - name: Run integrtion tests
+          if: ${{ success() && startsWith(github.event.comment.body, 'testInteg') }}
+          # Run the mock tests only
+          uses: gradle/gradle-build-action@v2
+          with:
+              arguments: |
+                  --info
+                  --console-plain
+                  --no-daemon
+                  integTest
+
+        - name: Stop container
+          if: ${{ startsWith(github.event.comment.body, '/testInteg') }}
+          run: docker stop jenkins-rest
+
+        - name: Publish test reports
+          uses: mikepenz/action-junit-report@v2
+          if: always()
+          with:
+              report_paths: '**/build/test-results/test/TEST-*.xml'
+
+        # Update the PR status by posting a status to the head SHA1 of the PR
+        # This is called a "commit status".
+        #
+        # First, some background information:
+        # Status functions are always(), success(), failure(), cancelled()
+        #     - See: https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#job-status-check-functions
+        # job.status can be: success, failure or cancelled
+        #     - See: https://docs.github.com/en/actions/reference/context-and-expression-syntax-for-github-actions#job-context
+        # The REST API for a commit status can accept: error, failure, pending or success
+        #     - See https://docs.github.com/en/rest/reference/repos#create-a-commit-status
+        #
+        # When the job status success() function returns true, set commit-status to job.status (success)
+        # When the job status failure() function returns true, set commit-status to job.status (failure)
+        # Nothing else can update the commit-status, so it remains in its previous state (pending)
+        - name: Update PR status
+          if: ${{ success() || failure() }}
+          run: |
+              curl -X POST -v \
+              --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
+              --header "Accept: application/vnd.github.v3+json" \
+              --data '{
+                  "context": "pull-request-test",
+                  "state": "${{ job.status }}",
+                  "description": "pull-request-test ${{ job.status }}",
+                  "target_url": "https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+              }' \
+              --url 'https://api.github.com/repos/${{ github.repository }}/statuses/${{ fromJSON(steps.pr-context.outputs.result).data.head.sha }}' \
+              --fail

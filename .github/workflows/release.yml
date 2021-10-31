@@ -1,38 +1,112 @@
-name: Release Manually
+name: Release and Publish
 
-on: workflow_dispatch
+on:
+    workflow_dispatch:
+    release:
+        types: [published]
 
 jobs:
-    allTests:
-        runs-on: ubuntu-latest
-        timeout-minutes: 20
+    perform-release:
+      runs-on: ubuntu-latest
+      timeout-minutes: 30
 
-        steps:
-            - name: Clone
-              uses: actions/checkout@v2
+      steps:
 
-            - name: Start Jenkins
-              run: |
-                  docker build -t jenkins-rest/jenkins src/main/docker
-                  docker run -d --rm -p 8080:8080 --name jenkins-rest jenkins-rest/jenkins
+        # Some steps for learning and for debug
+        - name: GITHUB_EVENT_PATH (debug)
+          run: cat $GITHUB_EVENT_PATH
+        #- name: github.event.issue.pull_request (debug)
+        #  env:
+        #      PR: ${{ toJSON(github.event.issue.pull_request) }}
+        #  run: echo "-- $PR --"
+        #- name: github.event.comment.body (debug)
+        #  env:
+        #      COMMENT: ${{ toJSON(github.event.comment.body) }}
+        #  run: echo "-- $COMMENT --"
+        #- name: curl pull request url (debug)
+        #  run: curl -s -X GET ${{ github.event.issue.pull_request.url }}
 
-            - uses: actions/setup-java@v2
-              with:
-                  distribution: 'adopt'
-                  java-version: 11
+        - name: Show release tag
+          run: echo ${{ github.event.release.tag_name }}
 
-            - name: Run all tests
-              uses: gradle/gradle-build-action@v1
-              with:
-                  arguments: -s -Dorg.gradle.daemon=false clean build mockTest publishToMavenLocal integTest
+        - name: Checkout main
+          uses: actions/checkout@v2
 
-            - name: Stop container
-              if: always()
-              run: docker stop jenkins-rest
+        - name: Git show
+          run: git show --summary
 
-            - name: Archive Test Results
-              if: always()
-              uses: actions/upload-artifact@v2
-              with:
-                  name: test-artifacts
-                  path: build/reports/tests
+        - name: Start Jenkins
+          run: |
+              docker build -t jenkins-rest/jenkins src/main/docker
+              docker run -d --rm -p 8080:8080 --name jenkins-rest jenkins-rest/jenkins
+
+        - name: Setup adopt java 11
+          uses: actions/setup-java@v2
+          with:
+              distribution: 'adopt'
+              java-version: 11
+
+        - name: Validate gradle wrapper
+          uses: gradle/wrapper-validation-action@v1
+
+        - name: Run all tests
+          if: success()
+          uses: gradle/gradle-build-action@v2
+          with:
+              arguments: |
+                  --info
+                  --console-plain
+                  --no-daemon
+                  build
+                  mockTest
+                  integTest
+
+        - name: Stop container
+          if: always()
+          run: docker stop jenkins-rest
+
+        - name: publishToMavenLocal
+          if: success()
+          uses: gradle/gradle-build-action@v2
+          env:
+              ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+              ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.SIGNING_KEY_ID }}
+              ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+          with:
+              arguments: |
+                  --info
+                  --console-plain
+                  --no-daemon
+                  publishToMavenLocal
+                  -Pversion=${{ github.event.release.tag_name }}
+                  -PsignPublication=true
+
+        - name: Display tree of mavenLocal
+          if: success()
+          run: tree ~/.m2/repository/io/github/jrestclients
+
+        - name: publishToSonatype and closeSonatypeStagingRepository
+          if: success()
+          uses: gradle/gradle-build-action@v2
+          env:
+              ORG_GRADLE_PROJECT_signingKey: ${{ secrets.SIGNING_KEY }}
+              ORG_GRADLE_PROJECT_signingKeyId: ${{ secrets.SIGNING_KEY_ID }}
+              ORG_GRADLE_PROJECT_signingPassword: ${{ secrets.SIGNING_PASSWORD }}
+              ORG_GRADLE_PROJECT_sonatypeUsername: ${{ secrets.SONATYPE_USERNAME }}
+              ORG_GRADLE_PROJECT_sonatypePassword: ${{ secrets.SONATYPE_PASSWORD }}
+          with:
+              arguments: |
+                  --info
+                  --console=plain
+                  --no-daemon
+                  publishToSonatype
+                  closeSonatypeStagingRepository
+                  -Pversion=${{ github.event.release.tag_name }}
+                  -PsignPublication=true
+
+        - name: Archive Test Results
+          if: always()
+          uses: actions/upload-artifact@v2
+          with:
+              name: test-artifacts
+              path: build/reports/tests

@@ -49,9 +49,31 @@ publishing {
     }
 }
 
+// To get the list of all pgp packets
+// gpg -a --export <keyid> | gpg --list-packets --verbose
+// To get the list of all keys and subkeys
+// gpg --keyid-format LONG --list-keys
+// How I got the password: ran this until all chars could be echo'ed on the command line without
+// causing trouble with bash
+// tr -cd '[:graph:]' < /dev/urandom | head -c 40
 signing {
+    boolean signPublication = findProperty("signPublication")?.toBoolean()
+    def signingKeyId = findProperty("signingKeyId")
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
     required {
-        !version.endsWith("SNAPSHOT") && gradle.taskGraph.hasTask("publish")
+        boolean doSign = signPublication && (!version.endsWith("SNAPSHOT") && (gradle.taskGraph.hasTask(":publishToSonaType") || gradle.taskGraph.hasTask(":publishToMavenLocal")))
+        if (doSign && signingKeyId == null) {
+            throw new InvalidUserDataException('signingKeyId is null. Define it with: export ORG_GRADLE_PROJECT_signingKeyId=<8-char key id>')
+        }
+        if (doSign && signingKey == null) {
+            throw new InvalidUserDataException('signingKey is null. Define it with: export ORG_GRADLE_PROJECT_signingKey=$(gpg --armor --export-secret-key <8-char key id>)')
+        }
+        if (doSign && signingPassword == null) {
+            throw new InvalidUserDataException('signingPassword property is null. Define it with export ORG_GRADLE_PROJECT_signingPassword=<password>')
+        }
+        doSign
     }
+    useInMemoryPgpKeys(signingKeyId, signingKey, signingPassword)
     sign publishing.publications.mavenJava
 }

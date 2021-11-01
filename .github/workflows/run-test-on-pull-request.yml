@@ -19,6 +19,9 @@ jobs:
 
     steps:
 
+        - name: Run my PR
+          run: echo "This is my code"
+
         # Some steps for learning and for debug
         #- name: github.event.issue.pull_request (debug)
         #  env:

@@ -24,7 +24,7 @@ assertTrue(systemInfo.jenkinsVersion().equals("1.642.4"));
 Can be found in maven central like so:
 ```
 <dependency>
-  <groupId>io.github.jrestlients</groupId>
+  <groupId>io.github.jrestclients</groupId>
   <artifactId>jenkins-rest</artifactId>
   <version>X.Y.Z</version>
   <classifier>sources|tests|javadoc|all</classifier> (Optional)

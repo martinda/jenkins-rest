@@ -62,7 +62,7 @@ signing {
     def signingKey = findProperty("signingKey")
     def signingPassword = findProperty("signingPassword")
     required {
-        boolean doSign = signPublication && (!version.endsWith("SNAPSHOT") && (gradle.taskGraph.hasTask(":publishToSonaType") || gradle.taskGraph.hasTask(":publishToMavenLocal")))
+        boolean doSign = signPublication && (!version.endsWith("SNAPSHOT") && (gradle.taskGraph.hasTask(":publishToSonatype") || gradle.taskGraph.hasTask(":publishToMavenLocal")))
         if (doSign && signingKeyId == null) {
             throw new InvalidUserDataException('signingKeyId is null. Define it with: export ORG_GRADLE_PROJECT_signingKeyId=<8-char key id>')
         }

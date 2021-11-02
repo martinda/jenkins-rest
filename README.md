@@ -1,6 +1,4 @@
-
-[![Build](https://github.com/jrestclients/jenkins-rest/actions/workflows/gradle/badge.svg?branch=main)](https://github.com/jrestclients/jenkins-rest/actions/workflows/gradle.yml?query=branch%3Amain)
-[![Stack Overflow](https://img.shields.io/badge/stack%20overflow-jenkins&#8211;rest-4183C4.svg)](https://stackoverflow.com/questions/tagged/jenkins+rest)
+[![Stack Overflow](https://img.shields.io/badge/stack%21overflow-jenkins&#8211;rest-4183C4.svg)](https://stackoverflow.com/questions/tagged/jenkins+rest)
 
 # jenkins-rest
 
@@ -64,7 +62,7 @@ jenkins-rest credentials can take 1 of 2 forms:
 
 ## Examples
 
-The [mock](https://github.com/jrestclients/jenkins-rest/tree/master/src/test/java/com/cdancy/jenkins/rest/features) and [live](https://github.com/jrestclients/jenkins-rest/tree/master/src/test/java/com/cdancy/jenkins/rest/features) tests provide many examples
+The [mock](https://github.com/jrestclients/jenkins-rest/tree/main/src/test/java/com/cdancy/jenkins/rest/features) and [live](https://github.com/jrestclients/jenkins-rest/tree/main/src/test/java/com/cdancy/jenkins/rest/features) tests provide many examples
 that you can use in your own code.
 
 ## Components

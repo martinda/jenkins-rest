@@ -49,16 +49,28 @@ Setting the `endpoint` can be done with any of the following (searched in order)
 
 Setting the `credentials` can be done with any of the following (searched in order):
 
+- `jenkins.rest.api.token`
+- `jenkinsRestApiToken`
+- `JENKINS_REST_API_TOKEN`
 - `jenkins.rest.credentials`
 - `jenkinsRestCredentials`
 - `JENKINS_REST_CREDENTIALS`
 
 ## Credentials
 
-jenkins-rest credentials can take 1 of 2 forms:
+jenkins-rest credentials can take 1 of 3 forms:
 
-- Colon delimited username and password: __admin:password__ 
-- Base64 encoded username and password: __YWRtaW46cGFzc3dvcmQ=__ 
+- Colon delimited username and api token: __admin:apiToken__
+  - use `JenkinsClient.builder().apiToken("admin:apiToken")`
+- Colon delimited username and password: __admin:password__
+  - use `JenkinsClient.builder().credentials("admin:password")`
+- Base64 encoded username followed by password __YWRtaW46cGFzc3dvcmQ=__ or api token __YWRtaW46YXBpVG9rZW4=__
+  - use `JenkinsClient.builder().apiToken("YWRtaW46YXBpVG9rZW4=")`
+  - use `JenkinsClient.builder().credentials("YWRtaW46cGFzc3dvcmQ=")`
+
+The Jenkins crumb is automatically requested for the anonymous and the username:password authentication methods.
+It is not requested when you use the apiToken as it is not needed.
+For more details, see the [Cloudbees crumb documentation](https://support.cloudbees.com/hc/en-us/articles/219257077-CSRF-Protection-Explained).
 
 ## Examples
 
@@ -101,7 +113,7 @@ This project provides instructions to setup a [pre-configured Docker container](
 #### Integration tests configuration
 
 - jenkins url and authentication method used by the tests are defined in the `gradle.properties` file
-- by default, tests use the `credentials` authentication but this can be changed to use the `token` authentication
+- by default, tests use the `apiToken` authentication but this can be changed to use the other authentication methods.
 
 
 #### Running integration tests from within your IDE

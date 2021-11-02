@@ -22,18 +22,24 @@ package com.cdancy.jenkins.rest.auth;
  */
 public enum AuthenticationType {
 
-    Basic("Basic"),
-    Bearer("Bearer"),
-    Anonymous("");
+    UsernamePassword("UsernamePassword", "Basic"),
+    ApiToken("ApiToken", "Basic"),
+    Anonymous("Anonymous", "");
 
-    private final String type;
+    private final String authName;
+    private final String authScheme;
 
-    private AuthenticationType(final String type) {
-        this.type = type;
+    private AuthenticationType(final String authName, final String authScheme) {
+        this.authName = authName;
+        this.authScheme = authScheme;
+    }
+
+    public String getAuthScheme() {
+        return authScheme;
     }
 
     @Override
     public String toString() {
-        return type;
+        return authName;
     }
 }

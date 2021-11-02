@@ -66,7 +66,7 @@ public class BaseJenkinsMockTest {
      * @return instance of JenkinsApi.
      */
     public JenkinsApi api(final URL url) {
-        final JenkinsAuthentication creds = JenkinsAuthentication.builder().build();
+        final JenkinsAuthentication creds = JenkinsAuthentication.builder().apiToken("user:apiKey").build();
         final JenkinsAuthenticationModule credsModule = new JenkinsAuthenticationModule(creds);
         return ContextBuilder.newBuilder(provider)
                 .endpoint(url.toString())

@@ -368,7 +368,6 @@ public class JobsApiLiveTest extends BaseJenkinsApiLiveTest {
         assertNotNull(causes);
         assertTrue(causes.size() > 0);
         assertNotNull(causes.get(0).shortDescription());
-        assertNotNull(causes.get(0).userId());
         assertNotNull(causes.get(0).userName());
     }
 

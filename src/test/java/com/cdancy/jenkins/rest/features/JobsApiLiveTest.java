@@ -48,7 +48,7 @@ public class JobsApiLiveTest extends BaseJenkinsApiLiveTest {
         assertTrue(success.value());
     }
 
-    @Test(dependsOnMethods = "testCreateJob")
+    @Test(dependsOnMethods = {"testCreateJob", "testCreateJobForEmptyAndNullParams"})
     public void testGetJobListFromRoot() {
         JobList output = api().jobList("");
         assertNotNull(output);
@@ -279,7 +279,7 @@ public class JobsApiLiveTest extends BaseJenkinsApiLiveTest {
         assertNotNull(output);
         assertFalse(output.jobs().isEmpty());
         assertEquals(output.jobs().size(), 1);
-        assertEquals(output.jobs().get(0), Job.create("hudson.model.FreeStyleProject", "JobInFolder", "http://127.0.0.1:8080/job/test-folder/job/test-folder-1/job/JobInFolder/", "notbuilt"));
+        assertEquals(output.jobs().get(0), Job.create("hudson.model.FreeStyleProject", "JobInFolder", System.getProperty("test.jenkins.endpoint")+"/job/test-folder/job/test-folder-1/job/JobInFolder/", "notbuilt"));
     }
 
     @Test(dependsOnMethods = "testCreateJobInFolder")
@@ -368,7 +368,6 @@ public class JobsApiLiveTest extends BaseJenkinsApiLiveTest {
         assertNotNull(causes);
         assertTrue(causes.size() > 0);
         assertNotNull(causes.get(0).shortDescription());
-        assertNotNull(causes.get(0).userId());
         assertNotNull(causes.get(0).userName());
     }
 
@@ -380,6 +379,7 @@ public class JobsApiLiveTest extends BaseJenkinsApiLiveTest {
         assertFalse(output.hasMoreData());
     }
 
+    @Test
     public void testCreateJobForEmptyAndNullParams() {
         String config = payloadFromResource("/freestyle-project-empty-and-null-params.xml");
         RequestStatus success = api().create(null, "JobForEmptyAndNullParams", config);
@@ -409,7 +409,7 @@ public class JobsApiLiveTest extends BaseJenkinsApiLiveTest {
         assertTrue(parameters.get(1).value().isEmpty());
     }
 
-    @Test(dependsOnMethods = "testGetBuildParametersOfJobForEmptyAndNullParams")
+    @Test(dependsOnMethods = { "testGetBuildParametersOfJobForEmptyAndNullParams", "testGetJobListFromRoot"})
     public void testDeleteJobForEmptyAndNullParams() {
         RequestStatus success = api().delete(null, "JobForEmptyAndNullParams");
         assertTrue(success.value());
